@@ -4,6 +4,7 @@ import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
 from scipy.spatial import KDTree
+from std_msgs.msg import Int32
 import numpy as np
 
 import math
@@ -24,6 +25,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+STOP_BEFORE = 8
 
 
 class WaypointUpdater(object):
@@ -34,15 +36,19 @@ class WaypointUpdater(object):
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
         # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
+        rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
 
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
+        self.max_velocity = None
         self.pose = None
-        self .waypoints= None
+        self.waypoints= None
         self.waypoints_xy = None
         self.kdTree = None
+
+        self.traffic_waypoint = None
 
         self.loop()
 
@@ -50,6 +56,7 @@ class WaypointUpdater(object):
         rate = rospy.Rate(50)
         while not rospy.is_shutdown():
             if not None in [self.pose, self.waypoints_xy, self.kdTree]:
+                rospy.loginfo("Pose,0,%0.3lf,%0.3lf", self.pose.position.x, self.pose.position.y)
                 index = self.kdTree.query([self.pose.position.x, self.pose.position.y], 1)[1]
 
                 curr_wpt = np.array(self.waypoints_xy[index])
@@ -65,8 +72,38 @@ class WaypointUpdater(object):
 
                 lane = Lane()
                 lane.waypoints = self.waypoints[index: index + LOOKAHEAD_WPS]
-                if len(lane.waypoints) < LOOKAHEAD_WPS:
-                    lane.waypoints.extends(self.waypoints[:LOOKAHEAD_WPS - len(lane.waypoints)])
+
+                for i in range(len(lane.waypoints)):
+                    rospy.loginfo("Velocity,%d,%0.3f", i, self.get_waypoint_velocity(lane.waypoints[i]))
+                
+                rospy.loginfo("waypoints,From,%d,To,%d", index, index + LOOKAHEAD_WPS)
+                if not self.traffic_waypoint == None:
+                    rospy.loginfo("traffic_waypoint,%d", self.traffic_waypoint)
+                    if not self.traffic_waypoint == -1:
+                        if (self.traffic_waypoint < index + LOOKAHEAD_WPS):
+                            rospy.loginfo("handlestop")
+                            stop_waypoint = self.traffic_waypoint - STOP_BEFORE
+                            org_velocity = lane.waypoints[0].twist.twist.linear.x
+                            stop_index = stop_waypoint - index
+
+                            for i in range(len(lane.waypoints)):
+                                p = Waypoint()
+                                p.pose = lane.waypoints[i].pose
+                                if i >= stop_index:
+                                    velocity = 0
+                                else:
+                                    dist = self.distance(lane.waypoints, i, stop_index)
+                                    v = math.sqrt(2 * 3 * dist)
+                                    velocity = min(v, self.get_waypoint_velocity(lane.waypoints[i]))
+
+                                p.twist.twist.linear.x = velocity 
+                                lane.waypoints[i] = p
+
+
+
+                # if len(lane.waypoints) < LOOKAHEAD_WPS:
+                #     lane.waypoints.extend(self.waypoints[:LOOKAHEAD_WPS - len(lane.waypoints)])
+
                 self.final_waypoints_pub.publish(lane)
             rate.sleep()
 
@@ -82,7 +119,7 @@ class WaypointUpdater(object):
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
-        pass
+        self.traffic_waypoint = msg.data
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
@@ -101,6 +138,9 @@ class WaypointUpdater(object):
             dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
             wp1 = i
         return dist
+
+    def kmph2mps(self, velocity_kmph):
+        return (velocity_kmph * 1000.) / (60. * 60.)
 
 
 if __name__ == '__main__':

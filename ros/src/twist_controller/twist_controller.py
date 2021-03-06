@@ -16,9 +16,9 @@ class Controller(object):
         self.accel_limit = accel_limit
         self.wheel_radius = wheel_radius
 
-        throttle_Kp = 0.01
-        throttle_Ki = 0.0001
-        throttle_Kd = 0.02
+        throttle_Kp = 2.0
+        throttle_Ki = 0.4
+        throttle_Kd = 0.0
         throttle_min = 0.0
         throttle_max = 1.0
 
@@ -48,7 +48,7 @@ class Controller(object):
         if target_velocity == 0 and current_velocity < 0.1:
             throttle = 0
             brake = 400
-        elif throttle < 0.01 and target_velocity < current_velocity:
+        elif throttle < 0.1 and target_velocity < current_velocity:
             throttle = 0
             decel = max(target_velocity - current_velocity, self.decel_limit)
             brake = abs(decel) * self.vehicle_mass * self.wheel_radius
