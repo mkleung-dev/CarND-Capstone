@@ -56,7 +56,7 @@ class WaypointUpdater(object):
         rate = rospy.Rate(50)
         while not rospy.is_shutdown():
             if not None in [self.pose, self.waypoints_xy, self.kdTree]:
-                rospy.loginfo("Pose,0,%0.3lf,%0.3lf", self.pose.position.x, self.pose.position.y)
+                # rospy.loginfo("Pose,0,%0.3lf,%0.3lf", self.pose.position.x, self.pose.position.y)
                 index = self.kdTree.query([self.pose.position.x, self.pose.position.y], 1)[1]
 
                 curr_wpt = np.array(self.waypoints_xy[index])
@@ -73,15 +73,14 @@ class WaypointUpdater(object):
                 lane = Lane()
                 lane.waypoints = self.waypoints[index: index + LOOKAHEAD_WPS]
 
-                for i in range(len(lane.waypoints)):
-                    rospy.loginfo("Velocity,%d,%0.3f", i, self.get_waypoint_velocity(lane.waypoints[i]))
+                # for i in range(len(lane.waypoints)):
+                #     rospy.loginfo("Velocity,%d,%0.3f", i, self.get_waypoint_velocity(lane.waypoints[i]))
                 
-                rospy.loginfo("waypoints,From,%d,To,%d", index, index + LOOKAHEAD_WPS)
+                # rospy.loginfo("waypoints,From,%d,To,%d", index, index + LOOKAHEAD_WPS)
                 if not self.traffic_waypoint == None:
-                    rospy.loginfo("traffic_waypoint,%d", self.traffic_waypoint)
+                    # rospy.loginfo("traffic_waypoint,%d", self.traffic_waypoint)
                     if not self.traffic_waypoint == -1:
                         if (self.traffic_waypoint < index + LOOKAHEAD_WPS):
-                            rospy.loginfo("handlestop")
                             stop_waypoint = self.traffic_waypoint - STOP_BEFORE
                             org_velocity = lane.waypoints[0].twist.twist.linear.x
                             stop_index = stop_waypoint - index
@@ -98,8 +97,6 @@ class WaypointUpdater(object):
 
                                 p.twist.twist.linear.x = velocity 
                                 lane.waypoints[i] = p
-
-
 
                 # if len(lane.waypoints) < LOOKAHEAD_WPS:
                 #     lane.waypoints.extend(self.waypoints[:LOOKAHEAD_WPS - len(lane.waypoints)])

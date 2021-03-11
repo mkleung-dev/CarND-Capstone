@@ -10,6 +10,11 @@ from light_classification.tl_classifier import TLClassifier
 import tf
 import cv2
 import yaml
+import math
+
+import time
+
+
 
 from scipy.spatial import KDTree
 import numpy as np
@@ -54,6 +59,10 @@ class TLDetector(object):
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
         self.state_count = 0
+
+        self.save_count = 0
+        self.prev_save_diff = 0.3
+        self.prev_save_state = None
 
         self.has_image = False
 
@@ -115,7 +124,7 @@ class TLDetector(object):
 
         return index
 
-    def get_light_state(self, light):
+    def get_light_state(self, light, neg_distance, distance):
         """Determines the current color of the traffic light
 
         Args:
@@ -125,13 +134,28 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        if (True):
-            return light.state
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
+        t = time.localtime()
+        current_time = time.strftime("%H%M%S", t)
+        if ((not (self.prev_save_diff == distance and self.prev_save_state == light.state)) and self.save_count > 0):
+            if distance <= 120:
+                cv2.imwrite('/home/student/Developer/CarND/CarND-Capstone/train_image_{:02d}/{}/{}_{:08d}_waypoint_{:05.0f}.jpg'.format(0, light.state, current_time, self.save_count, distance), cv_image)
+            elif distance > 300 and neg_distance > 30:
+                cv2.imwrite('/home/student/Developer/CarND/CarND-Capstone/train_image_{:02d}/{}/{}_{:08d}_waypoint_{:05.0f}.jpg'.format(0, 9999, current_time, self.save_count, distance), cv_image)
+
+        self.prev_save_diff = distance
+        self.prev_save_state = light.state
+        self.save_count = self.save_count  + 1
+
+        result = self.light_classifier.get_classification(cv_image)
+        
+        # if (True):
+        #     return light.state
+
         #Get classification
-        return self.light_classifier.get_classification(cv_image)
+        return result
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
@@ -152,23 +176,36 @@ class TLDetector(object):
             # rospy.loginfo("Pose,0,%0.3lf,%0.3lf", self.pose.position.x, self.pose.position.y)
 
         min_diff = len(self.waypoints)
+        distance = 1000
+
+        min_neg_diff = len(self.waypoints)
+        neg_distance = 0
+        
         #TODO find the closest visible traffic light (if one exists)
         for i in range(len(stop_line_positions)):
             line_pos = stop_line_positions[i]
 
             line_index = self.get_closest_waypoint(line_pos[0], line_pos[1])
             temp_index_diff = line_index - car_index
-            if (temp_index_diff < 0):
-                temp_index_diff = temp_index_diff + len(self.waypoints)
+            # if (temp_index_diff < 0):
+            #     temp_index_diff = temp_index_diff + len(self.waypoints)
 
-            if temp_index_diff < min_diff:
-                min_diff = temp_index_diff
-                light_wp = line_index
-                light = self.lights[i]
+            if (temp_index_diff > 0):
+                if temp_index_diff < min_diff:
+                    distance = math.sqrt((self.pose.position.x - line_pos[0]) ** 2 + (self.pose.position.y - line_pos[1]) ** 2)
+                    min_diff = temp_index_diff
+                    light_wp = line_index
+                    pre_i = i - 1
+                    light = self.lights[i]
+
+            if (temp_index_diff <= 0):
+                if -temp_index_diff < min_neg_diff:
+                    neg_distance = math.sqrt((self.pose.position.x - line_pos[0]) ** 2 + (self.pose.position.y - line_pos[1]) ** 2)
+                    min_neg_diff = -temp_index_diff
 
         if light:
             # rospy.loginfo("WP,Car,%d,Light,%d,Color,%d", car_index, light_wp, light.state)
-            state = self.get_light_state(light)
+            state = self.get_light_state(light, neg_distance, distance)
             return light_wp, state
         return -1, TrafficLight.UNKNOWN
 
