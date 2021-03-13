@@ -14,6 +14,8 @@ from keras.layers.pooling import MaxPooling2D
 from keras.applications.inception_v3 import InceptionV3
 from keras.preprocessing.image import ImageDataGenerator
 
+size = (400, 300)
+
 train_dir = './train_image/train/'
 validation_dir = './train_image/validation/'
 
@@ -28,39 +30,27 @@ train_datagen = ImageDataGenerator(rescale=1./255,
 validation_datagen = ImageDataGenerator(rescale=1./255)
 
 train_generator = train_datagen.flow_from_directory(train_dir,
-                                                    target_size=(400, 300),
+                                                    target_size=size,
                                                     batch_size=32)
 validation_generator = validation_datagen.flow_from_directory(validation_dir,
-                                                    target_size=(400, 300),
+                                                    target_size=size,
                                                     batch_size=32)
 
-input = Input(shape=(299,299,3))
-base_model = InceptionV3(weights='imagenet', include_top=False, input_tensor=input)
-x = base_model.output
-
-x = Flatten()(x)
-x = Dense(512, activation='relu')(x)
-predictions = Dense(4, activation='softmax')(x)
-
-model = Model(input=base_model.input, output=predictions)
-for layer in base_model.layers:
-    layer.trainable = False
-
 model = Sequential([
-    Conv2D(32, (3, 3), activation="relu", input_shape=(400, 300, 3)),
+    Conv2D(16, (3, 3), activation="relu", input_shape=(size[0], size[1], 3)),
+    MaxPooling2D(2, 2),
+    Conv2D(16, (3, 3), activation="relu"),
+    MaxPooling2D(2, 2),
+    Conv2D(16, (3, 3), activation="relu"),
     MaxPooling2D(2, 2),
     Conv2D(32, (3, 3), activation="relu"),
     MaxPooling2D(2, 2),
-    Conv2D(64, (3, 3), activation="relu"),
+    Conv2D(32, (3, 3), activation="relu"),
     MaxPooling2D(2, 2),
-    Conv2D(64, (3, 3), activation="relu"),
-    MaxPooling2D(2, 2),
-    Conv2D(128, (3, 3), activation="relu"),
-    MaxPooling2D(2, 2),
-    Conv2D(128, (3, 3), activation="relu"),
+    Conv2D(32, (3, 3), activation="relu"),
     MaxPooling2D(2, 2),
     Flatten(),
-    Dense(1024, activation='relu'),
+    Dense(128, activation='relu'),
     Dense(4, activation='softmax')
 ])
 
@@ -70,22 +60,28 @@ model.compile(optimizer=RMSprop(lr=0.001),
 
 model.summary()
 
-model.fit_generator(train_generator, steps_per_epoch=100, epochs=20, validation_data=validation_generator, validation_steps=25)
+history = model.fit_generator(train_generator, steps_per_epoch=100, epochs=20, validation_data=validation_generator, validation_steps=25)
 
 model.save('CNN.h5')
 
-acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
+acc = history.history['acc']
+val_acc = history.history['val_acc']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
 epochs = range(len(acc))
-plt.plot(epochs, acc)
-plt.plot(epochs, val_acc)
+plt.plot(epochs, acc, label='Training accuracy')
+plt.plot(epochs, val_acc, label='Validation accuracy')
+plt.legend(loc='upper left')
 plt.title('Training and validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
 plt.figure()
 
-plt.plot(epochs, loss)
-plt.plot(epochs, val_loss)
+plt.plot(epochs, loss, label='Training loss')
+plt.plot(epochs, val_loss, label='Validation loss')
+plt.legend(loc='upper right')
 plt.title('Training and validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
 plt.show()

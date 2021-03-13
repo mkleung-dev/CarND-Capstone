@@ -20,6 +20,8 @@ import cv2
 
 model = load_model('./CNN.h5')
 
+model.summary()
+
 file_name = './train_image/train/green/0000.jpg'
 img = image.load_img(file_name, target_size=(400, 300))
 x = image.img_to_array(img)
