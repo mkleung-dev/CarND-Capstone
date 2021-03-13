@@ -1,0 +1,86 @@
+student@udacity:~/Developer/CarND/CarND-Capstone/detection$ python training.py 
+Using TensorFlow backend.
+Found 3200 images belonging to 4 classes.
+Found 800 images belonging to 4 classes.
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+conv2d_1 (Conv2D)            (None, 398, 298, 16)      448       
+_________________________________________________________________
+max_pooling2d_1 (MaxPooling2 (None, 199, 149, 16)      0         
+_________________________________________________________________
+conv2d_2 (Conv2D)            (None, 197, 147, 16)      2320      
+_________________________________________________________________
+max_pooling2d_2 (MaxPooling2 (None, 98, 73, 16)        0         
+_________________________________________________________________
+conv2d_3 (Conv2D)            (None, 96, 71, 16)        2320      
+_________________________________________________________________
+max_pooling2d_3 (MaxPooling2 (None, 48, 35, 16)        0         
+_________________________________________________________________
+conv2d_4 (Conv2D)            (None, 46, 33, 32)        4640      
+_________________________________________________________________
+max_pooling2d_4 (MaxPooling2 (None, 23, 16, 32)        0         
+_________________________________________________________________
+conv2d_5 (Conv2D)            (None, 21, 14, 32)        9248      
+_________________________________________________________________
+max_pooling2d_5 (MaxPooling2 (None, 10, 7, 32)         0         
+_________________________________________________________________
+conv2d_6 (Conv2D)            (None, 8, 5, 32)          9248      
+_________________________________________________________________
+max_pooling2d_6 (MaxPooling2 (None, 4, 2, 32)          0         
+_________________________________________________________________
+flatten_1 (Flatten)          (None, 256)               0         
+_________________________________________________________________
+dense_1 (Dense)              (None, 128)               32896     
+_________________________________________________________________
+dense_2 (Dense)              (None, 4)                 516       
+=================================================================
+Total params: 61,636
+Trainable params: 61,636
+Non-trainable params: 0
+_________________________________________________________________
+Epoch 1/20
+2021-03-13 04:38:43.167205: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+2021-03-13 04:38:43.167227: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+2021-03-13 04:38:43.167232: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+2021-03-13 04:38:43.167235: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+100/100 [==============================] - 245s - loss: 1.3328 - acc: 0.3475 - val_loss: 1.2764 - val_acc: 0.4275
+Epoch 2/20
+100/100 [==============================] - 243s - loss: 1.0338 - acc: 0.5256 - val_loss: 0.7257 - val_acc: 0.6987
+Epoch 3/20
+100/100 [==============================] - 243s - loss: 0.6766 - acc: 0.7316 - val_loss: 0.4269 - val_acc: 0.8313
+Epoch 4/20
+100/100 [==============================] - 243s - loss: 0.4817 - acc: 0.8328 - val_loss: 0.5953 - val_acc: 0.7725
+Epoch 5/20
+100/100 [==============================] - 243s - loss: 0.4129 - acc: 0.8606 - val_loss: 0.1109 - val_acc: 0.9750
+Epoch 6/20
+100/100 [==============================] - 243s - loss: 0.3665 - acc: 0.8669 - val_loss: 0.1108 - val_acc: 0.9625
+Epoch 7/20
+100/100 [==============================] - 243s - loss: 0.3075 - acc: 0.8950 - val_loss: 0.1040 - val_acc: 0.9788
+Epoch 8/20
+100/100 [==============================] - 243s - loss: 0.2912 - acc: 0.8981 - val_loss: 0.0962 - val_acc: 0.9838
+Epoch 9/20
+100/100 [==============================] - 243s - loss: 0.2474 - acc: 0.9087 - val_loss: 0.0532 - val_acc: 0.9938
+Epoch 10/20
+100/100 [==============================] - 243s - loss: 0.2322 - acc: 0.9181 - val_loss: 0.0566 - val_acc: 0.9912
+Epoch 11/20
+100/100 [==============================] - 243s - loss: 0.2271 - acc: 0.9222 - val_loss: 0.0592 - val_acc: 0.9912
+Epoch 12/20
+100/100 [==============================] - 243s - loss: 0.2159 - acc: 0.9253 - val_loss: 0.0244 - val_acc: 0.9938
+Epoch 13/20
+100/100 [==============================] - 243s - loss: 0.2009 - acc: 0.9359 - val_loss: 0.0761 - val_acc: 0.9925
+Epoch 14/20
+100/100 [==============================] - 242s - loss: 0.2480 - acc: 0.9237 - val_loss: 0.0633 - val_acc: 0.9925
+Epoch 15/20
+100/100 [==============================] - 243s - loss: 0.2091 - acc: 0.9309 - val_loss: 0.0439 - val_acc: 0.9962
+Epoch 16/20
+100/100 [==============================] - 243s - loss: 0.1955 - acc: 0.9353 - val_loss: 0.0507 - val_acc: 0.9925
+Epoch 17/20
+100/100 [==============================] - 243s - loss: 0.1873 - acc: 0.9353 - val_loss: 0.0376 - val_acc: 0.9975
+Epoch 18/20
+100/100 [==============================] - 243s - loss: 0.2120 - acc: 0.9322 - val_loss: 0.0371 - val_acc: 0.9975
+Epoch 19/20
+100/100 [==============================] - 242s - loss: 0.1702 - acc: 0.9372 - val_loss: 0.0149 - val_acc: 0.9975
+Epoch 20/20
+100/100 [==============================] - 243s - loss: 0.1888 - acc: 0.9363 - val_loss: 0.0346 - val_acc: 0.9900
+
