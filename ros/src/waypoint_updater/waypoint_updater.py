@@ -72,12 +72,7 @@ class WaypointUpdater(object):
                 lane = Lane()
                 lane.waypoints = self.waypoints[index: index + LOOKAHEAD_WPS]
 
-                # for i in range(len(lane.waypoints)):
-                #     rospy.loginfo("Velocity,%d,%0.3f", i, self.get_waypoint_velocity(lane.waypoints[i]))
-                
-                # rospy.loginfo("waypoints,From,%d,To,%d", index, index + LOOKAHEAD_WPS)
                 if not self.traffic_waypoint == None:
-                    # rospy.loginfo("traffic_waypoint,%d", self.traffic_waypoint)
                     if not self.traffic_waypoint == -1:
                         if (self.traffic_waypoint < index + LOOKAHEAD_WPS):
                             stop_waypoint = self.traffic_waypoint - STOP_BEFORE

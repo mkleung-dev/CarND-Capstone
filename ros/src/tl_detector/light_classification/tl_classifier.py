@@ -18,7 +18,7 @@ class TLClassifier(object):
         self.graph = tf.get_default_graph()
         with self.graph.as_default():
             with self.session.as_default():
-                self.model = load_model(os.getcwd() + '/light_classification/CNN_simple.h5')
+                self.model = load_model(os.getcwd() + '/light_classification/CNN.h5')
 
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
@@ -37,7 +37,6 @@ class TLClassifier(object):
             with self.session.as_default():
                 temp = self.model.predict(np.asarray(image)[np.newaxis, :])
         
-        rospy.loginfo("Image Prediction {}".format(temp))
         self.buffer_state = self.ans_map[np.argmax(temp)]
 
         return self.buffer_state

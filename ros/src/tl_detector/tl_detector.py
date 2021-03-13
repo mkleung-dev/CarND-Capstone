@@ -161,7 +161,6 @@ class TLDetector(object):
             self.classify_state = self.light_classifier.get_classification(cv_image)
         
         self.classify_count = (self.classify_count + 1) % 4
-        rospy.loginfo("Got Image {}".format(self.classify_count))
 
         #Get classification
         return self.classify_state
@@ -182,7 +181,6 @@ class TLDetector(object):
         stop_line_positions = self.config['stop_line_positions']
         if (self.pose):
             car_index = self.get_closest_waypoint(self.pose.position.x, self.pose.position.y)
-            # rospy.loginfo("Pose,0,%0.3lf,%0.3lf", self.pose.position.x, self.pose.position.y)
 
         min_diff = len(self.waypoints)
         distance = 1000
@@ -213,7 +211,6 @@ class TLDetector(object):
                     min_neg_diff = -temp_index_diff
 
         if light:
-            # rospy.loginfo("WP,Car,%d,Light,%d,Color,%d", car_index, light_wp, light.state)
             state = self.get_light_state(light, neg_distance, distance)
             return light_wp, state
         return -1, TrafficLight.UNKNOWN
