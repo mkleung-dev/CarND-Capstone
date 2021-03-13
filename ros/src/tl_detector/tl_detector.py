@@ -20,6 +20,7 @@ from scipy.spatial import KDTree
 import numpy as np
 
 STATE_COUNT_THRESHOLD = 3
+CLASSIFY_THRESHOLD = 4
 
 class TLDetector(object):
     def __init__(self):
@@ -59,6 +60,9 @@ class TLDetector(object):
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
         self.state_count = 0
+        
+        self.classify_count = 0
+        self.classify_state = TrafficLight.UNKNOWN
 
         self.save_count = 0
         self.prev_save_diff = 0.3
@@ -135,8 +139,8 @@ class TLDetector(object):
 
         """
 
-        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
+        """
         t = time.localtime()
         current_time = time.strftime("%H%M%S", t)
         if ((not (self.prev_save_diff == distance and self.prev_save_state == light.state)) and self.save_count > 0):
@@ -148,14 +152,19 @@ class TLDetector(object):
         self.prev_save_diff = distance
         self.prev_save_state = light.state
         self.save_count = self.save_count  + 1
+        """
 
-        result = self.light_classifier.get_classification(cv_image)
+        if self.classify_count == 0:
+            # self.classify_state = light.state
+            
+            cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "rgb8")
+            self.classify_state = self.light_classifier.get_classification(cv_image)
         
-        # if (True):
-        #     return light.state
+        self.classify_count = (self.classify_count + 1) % 4
+        rospy.loginfo("Got Image {}".format(self.classify_count))
 
         #Get classification
-        return result
+        return self.classify_state
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
