@@ -72,7 +72,7 @@ val_loss = history.history['val_loss']
 epochs = range(len(acc))
 plt.plot(epochs, acc, label='Training accuracy')
 plt.plot(epochs, val_acc, label='Validation accuracy')
-plt.legend(loc='upper left')
+plt.legend(loc='lower right')
 plt.title('Training and validation accuracy')
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
