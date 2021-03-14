@@ -24,7 +24,7 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 50 # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 50 # Number of waypoints we will publish. Set to 50 so that it can run in Udacity workspace.
 STOP_BEFORE = 8
 
 
@@ -32,22 +32,19 @@ class WaypointUpdater(object):
     def __init__(self):
         rospy.init_node('waypoint_updater')
 
+        # Subscriber
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
-
-        # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
         rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
-
-
+        
+        # Publisher
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
-        # TODO: Add other member variables you need below
-        self.max_velocity = None
+        # Member Variable
         self.pose = None
         self.waypoints= None
         self.waypoints_xy = None
         self.kdTree = None
-
         self.traffic_waypoint = None
 
         self.loop()
@@ -72,11 +69,12 @@ class WaypointUpdater(object):
                 lane = Lane()
                 lane.waypoints = self.waypoints[index: index + LOOKAHEAD_WPS]
 
+                # Decelerate to stop if there is red traffic light.
                 if not self.traffic_waypoint == None:
                     if not self.traffic_waypoint == -1:
                         if (self.traffic_waypoint < index + LOOKAHEAD_WPS):
                             stop_waypoint = self.traffic_waypoint - STOP_BEFORE
-                            org_velocity = lane.waypoints[0].twist.twist.linear.x
+                            # index in the computed waypoints
                             stop_index = stop_waypoint - index
 
                             for i in range(len(lane.waypoints)):
