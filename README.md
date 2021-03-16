@@ -1,4 +1,135 @@
-This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
+# **Programming a Real Self-Driving Car**
+
+## Build a Traffic Sign Recognition Project
+
+The goals / steps of this project are to write ROS nodes to implement core functionality of the autonomous vehicle, including the followings:
+* Traffic light detction
+* Control
+* Waypoint followings
+
+[//]: # (Image References)
+
+[system_architecture]: ./image/system_architecture.png "System Architecture"
+[waypoint_loader_node]: ./image/waypoint_loader_node.png "Waypoint Loader Node"
+[waypoint_follower_node]: ./image/waypoint_follower_node.png "Waypoint Follower Node"
+[waypoint_updater_node]: ./image/waypoint_updater_node.png "Waypoint Updater Node"
+[drive_by_wire_node]: ./image/drive_by_wire_node.png "Drive by Wire Node"
+[traffic_light_detection_node]: ./image/traffic_light_detection_node.png "Traffic Light Detection Node"
+[model_accuracy]: ./image/model_accuracy.png "Model Accuracy"
+[model_loss]: ./image/model_loss.png "Model Loss"
+
+## System Architecture
+
+The following diagram illustrate the system architecture showing the ROS nodes and tpics in the project.
+
+![System Architecture][system_architecture]
+
+## Waypoint Loader Node
+
+Waypoint loader node is resposible to loads the static waypoint data and publishes to `/base_waypoints`.
+
+They are located in `./ros/src/waypoint_loader/`.
+
+![Waypoint Loader Node][waypoint_loader_node]
+
+## Waypoint Follower Node
+
+Waypoint follwer node containing code from Autoware is resposible to subscribes to `/final_waypoints` and publishes target vehicle linear and angular velocities to the `/twist_cmd` topic.
+
+They are located in `./ros/src/waypoint_follower/`.
+
+![Waypoint Follower Node][waypoint_follower_node]
+
+## Waypoint Updater Node
+
+Waypoint updater node is responsible to compute the target velocity property of each waypoint based on the traffic light. The node subscribes to the `/base_waypoints`, `/current_pose`, `/obstacle_waypoint`, and `traffic_waypoint` topics. It publish a list of waypoints, containing velocities, ahead of the car to the `/final_waypoints` topics.
+
+They are located in `./ros/src/waypoint_updater/`.
+
+![Waypoint Updater Node][waypoint_updater_node]
+
+## Drive-by-wire (DBW) Node
+
+Driver-by-wire node is responsible to control of the vehicle by computing throttle, steering, and brake. It subscribes to `/current_velocity`, `/twist_cmd`, and `/vehicle/dbw_enabled'. The throttle, steering, brake commands are computed and publish to `/vehicle/throttle_cmd`, `/vehicle/steering_cmd`, and `/vehicle/brake_cmd` topics.
+
+They are located in `./ros/src/twist_controller/`.
+
+![Drive by Wire Node][drive_by_wire_node]
+
+## Traffic Light Detection Node
+
+Traffic light detection node is responsible to publishes the locations to stop for red traffic lights to the `/traffic_waypoint` topic given the data from `/image_color`, `/current_pose`, and `/base_waypoints`.
+
+They are located in `./ros/src/tl_detector/`.
+
+![Traffic Light Detection Node][traffic_light_detection_node]
+
+A traffic light classification model is built to classify if there is red traffic light ahead of the car. The car would stop in front of the stop line.
+
+### Classification
+
+The traffic light classification model is built using convolution neutral network. Details are described below.
+
+#### 1. Dataset Summary.
+
+4000 images are gathered by running the car in the simulator. 
+
+|Label                 |No of images |
+|:---------------------|:-----------:|
+|Green traffic light   |1000         |
+|Yellow traffic light  |1000         |
+|Red traffic light     |1000         |
+|Without traffic light |1000         |
+
+80% of the images are used for training.
+20% of the images are used for validation.
+
+#### 2. Model Architecture
+
+The model consists of the following layers. The model and its training is implemented in `detection/training.py`.
+
+|Layer             |Description                 |Output         |Parameter|
+|:-----------------|:---------------------------|:-------------:|:-------:|
+|Input             |RGB image                   |400 x 300 x 1  |         |
+|Convolution 3 x 3 |1 x 1 stride, no padding    |398 x 298 x 16 |448      |
+|RELU              |Relu Activation             |398 x 298 x 16 |0        |
+|Max pooling 2 x 2 |2 x 2 stride                |199 x 149 x 16 |0        |
+|Convolution 3 x 3 |1 x 1 stride, no padding    |197 x 147 x 16 |2320     |
+|RELU              |Relu Activation             |197 x 147 x 16 |0        |
+|Max pooling 2 x 2 |2 x 2 stride                |98 x 73 x 16   |0        |
+|Convolution 3 x 3 |1 x 1 stride, no padding    |96 x 71 x 16   |2320     |
+|RELU              |Relu Activation             |96 x 71 x 16   |0        |
+|Max pooling 2 x 2 |2 x 2 stride                |48 x 35 x 16   |0        |
+|Convolution 3 x 3 |1 x 1 stride, no padding    |46 x 33 x 32   |4640     |
+|RELU              |Relu Activation             |46 x 33 x 32   |0        |
+|Max pooling 2 x 2 |2 x 2 stride                |23 x 16 x 32   |0        |
+|Convolution 3 x 3 |1 x 1 stride, no padding    |21 x 14 x 32   |9248     |
+|RELU              |Relu Activation             |21 x 14 x 32   |0        |
+|Max pooling 2 x 2 |2 x 2 stride                |10 x 7 x 32    |0        |
+|Convolution 3 x 3 |1 x 1 stride, no padding    |8 x 5 x 32     |9248     |
+|RELU              |Relu Activation             |8 x 5 x 32     |0        |
+|Max pooling 2 x 2 |2 x 2 stride                |4 x 2 x 32     |0        |
+|Flatten           |Flatten                     |256            |0        |
+|Dense             |Dense network               |256            |32896    |
+|Dense             |Dense network               |128            |516      |
+|Softmax           |Softmax                     |4              |0        |
+
+#### 3. Model Training
+
+The model was trained using RMSprop with the following parameters.
+
+|Item            |Value|
+|:---------------|:---:|
+|Batch size      |32   |
+|Number of epochs|20   |
+|Learning rate   |0.001|
+
+The accuracy and the loss for training and validation are shown in the following figures. 
+
+![Model Accuracy][model_accuracy]
+![Model Loss][model_loss]
+
+## Installation
 
 Please use **one** of the two installation options, either native **or** docker installation.
 
@@ -30,10 +161,10 @@ Run the docker file
 docker run -p 4567:4567 -v $PWD:/capstone -v /tmp/log:/root/.ros/ --rm -it capstone
 ```
 
-### Port Forwarding
+## Port Forwarding
 To set up port forwarding, please refer to the "uWebSocketIO Starter Guide" found in the classroom (see Extended Kalman Filter Project lesson).
 
-### Usage
+## Usage
 
 1. Clone the project repository
 ```bash
@@ -54,24 +185,7 @@ roslaunch launch/styx.launch
 ```
 4. Run the simulator
 
-### Real world testing
-1. Download [training bag](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/traffic_light_bag_file.zip) that was recorded on the Udacity self-driving car.
-2. Unzip the file
-```bash
-unzip traffic_light_bag_file.zip
-```
-3. Play the bag file
-```bash
-rosbag play -l traffic_light_bag_file/traffic_light_training.bag
-```
-4. Launch your project in site mode
-```bash
-cd CarND-Capstone/ros
-roslaunch launch/site.launch
-```
-5. Confirm that traffic light detection works on real life images
-
-### Other library/driver information
+## Other library/driver information
 Outside of `requirements.txt`, here is information on other driver/library versions used in the simulator and Carla:
 
 Specific to these libraries, the simulator grader and Carla use the following:
@@ -84,5 +198,3 @@ Specific to these libraries, the simulator grader and Carla use the following:
 | TensorRT | N/A | N/A |
 | OpenCV | 3.2.0-dev | 2.4.8 |
 | OpenMP | N/A | N/A |
-
-We are working on a fix to line up the OpenCV versions between the two.
