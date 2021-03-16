@@ -184,17 +184,3 @@ source devel/setup.sh
 roslaunch launch/styx.launch
 ```
 4. Run the simulator
-
-## Other library/driver information
-Outside of `requirements.txt`, here is information on other driver/library versions used in the simulator and Carla:
-
-Specific to these libraries, the simulator grader and Carla use the following:
-
-|        | Simulator | Carla  |
-| :-----------: |:-------------:| :-----:|
-| Nvidia driver | 384.130 | 384.130 |
-| CUDA | 8.0.61 | 8.0.61 |
-| cuDNN | 6.0.21 | 6.0.21 |
-| TensorRT | N/A | N/A |
-| OpenCV | 3.2.0-dev | 2.4.8 |
-| OpenMP | N/A | N/A |
