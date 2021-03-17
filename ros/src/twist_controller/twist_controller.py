@@ -50,7 +50,7 @@ class Controller(object):
         # Use brake to stop or decelerate
         if target_velocity == 0 and current_velocity < 0.1:
             throttle = 0
-            brake = 400
+            brake = 700
         elif throttle < 0.1 and target_velocity < current_velocity:
             throttle = 0
             decel = max(target_velocity - current_velocity, self.decel_limit)
