@@ -85,8 +85,8 @@ class WaypointUpdater(object):
                                 if i >= stop_index:
                                     velocity = 0
                                 else:
-                                    dist = self.distance(lane.waypoints, i, i + 1)
-                                    velocity = math.sqrt(2 * MAX_DECELERATION * dist) + velocity
+                                    dist = dist + self.distance(lane.waypoints, i, i + 1)
+                                    velocity = math.sqrt(2 * MAX_DECELERATION * dist)
                                     velocity = min(velocity, self.get_waypoint_velocity(lane.waypoints[i]))
 
                                 p.twist.twist.linear.x = velocity 
