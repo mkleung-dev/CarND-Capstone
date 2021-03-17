@@ -42,7 +42,9 @@ They are located in `./ros/src/waypoint_follower/`.
 
 ## Waypoint Updater Node
 
-Waypoint updater node is responsible to compute the target velocity property of each waypoint based on the traffic light. The node subscribes to the `/base_waypoints`, `/current_pose`, `/obstacle_waypoint`, and `traffic_waypoint` topics. It publish a list of waypoints, containing velocities, ahead of the car to the `/final_waypoints` topics.
+Waypoint updater node is responsible to compute the target velocity property of each waypoint based on the traffic light.
+The node subscribes to the `/base_waypoints`, `/current_pose`, `/obstacle_waypoint`, and `traffic_waypoint` topics.
+It publishes a list of waypoints, containing velocities, ahead of the car to the `/final_waypoints` topics.
 
 They are located in `./ros/src/waypoint_updater/`.
 
@@ -50,11 +52,14 @@ They are located in `./ros/src/waypoint_updater/`.
 
 ## Drive-by-wire (DBW) Node
 
-Driver-by-wire node is responsible to control of the vehicle by computing throttle, steering, and brake. It subscribes to `/current_velocity`, `/twist_cmd`, and `/vehicle/dbw_enabled'. The throttle, steering, brake commands are computed and publish to `/vehicle/throttle_cmd`, `/vehicle/steering_cmd`, and `/vehicle/brake_cmd` topics.
+![Drive by Wire Node][drive_by_wire_node]
+
+Driver-by-wire node is responsible to control of the vehicle by computing throttle, steering, and brake.
+It subscribes to `/current_velocity`, `/twist_cmd`, and `/vehicle/dbw_enabled`.
+The throttle, steering, brake commands are computed and publish to `/vehicle/throttle_cmd`, `/vehicle/steering_cmd`, and `/vehicle/brake_cmd` topics.
 
 They are located in `./ros/src/twist_controller/`.
 
-![Drive by Wire Node][drive_by_wire_node]
 
 ## Traffic Light Detection Node
 
@@ -64,7 +69,8 @@ They are located in `./ros/src/tl_detector/`.
 
 ![Traffic Light Detection Node][traffic_light_detection_node]
 
-A traffic light classification model is built to classify if there is red traffic light ahead of the car. The car would stop in front of the stop line.
+A traffic light classification model is built to classify if there is red traffic light ahead of the car.
+The car would stop in front of the stop line.
 
 ### Classification
 
