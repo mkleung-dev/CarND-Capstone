@@ -3,22 +3,20 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 
+from keras.preprocessing.image import ImageDataGenerator
+
 from keras.models import Model, Sequential
 from keras.layers import Dense, Input
 from keras.layers.convolutional import Conv2D
 from keras.layers.core import Flatten
 from keras.layers.pooling import MaxPooling2D
 from keras.optimizers import RMSprop
-from keras.layers.pooling import MaxPooling2D
-
-from keras.applications.inception_v3 import InceptionV3
-from keras.preprocessing.image import ImageDataGenerator
 
 size = (400, 300)
-
 train_dir = './train_image/train/'
 validation_dir = './train_image/validation/'
 
+# Image Augmentation
 train_datagen = ImageDataGenerator(rescale=1./255,
                                    shear_range=0.2,
                                    zoom_range=0.1,
@@ -36,6 +34,7 @@ validation_generator = validation_datagen.flow_from_directory(validation_dir,
                                                     target_size=size,
                                                     batch_size=32)
 
+# Convolution Neutral Network
 model = Sequential([
     Conv2D(16, (3, 3), activation="relu", input_shape=(size[0], size[1], 3)),
     MaxPooling2D(2, 2),
@@ -60,10 +59,13 @@ model.compile(optimizer=RMSprop(lr=0.001),
 
 model.summary()
 
+# Training
 history = model.fit_generator(train_generator, steps_per_epoch=100, epochs=20, validation_data=validation_generator, validation_steps=25)
 
+# Save the model with the weights
 model.save('CNN.h5')
 
+# Plot accuracy and loss history
 acc = history.history['acc']
 val_acc = history.history['val_acc']
 loss = history.history['loss']
