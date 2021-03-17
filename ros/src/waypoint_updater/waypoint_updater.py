@@ -78,15 +78,16 @@ class WaypointUpdater(object):
                             stop_index = stop_waypoint - index
 
                             # Set the velocity in the waypoints to stop the vehicle.
-                            for i in range(len(lane.waypoints)):
+                            dist = 0
+                            for i in reversed(range(len(lane.waypoints))):
                                 p = Waypoint()
                                 p.pose = lane.waypoints[i].pose
                                 if i >= stop_index:
                                     velocity = 0
                                 else:
-                                    dist = self.distance(lane.waypoints, i, stop_index)
-                                    v = math.sqrt(2 * MAX_DECELERATION * dist)
-                                    velocity = min(v, self.get_waypoint_velocity(lane.waypoints[i]))
+                                    dist = self.distance(lane.waypoints, i, i + 1)
+                                    velocity = math.sqrt(2 * MAX_DECELERATION * dist) + velocity
+                                    velocity = min(velocity, self.get_waypoint_velocity(lane.waypoints[i]))
 
                                 p.twist.twist.linear.x = velocity 
                                 lane.waypoints[i] = p
