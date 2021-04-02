@@ -1,7 +1,7 @@
 # **Programming a Self-Driving Car in a Simulator **
 
 The goals / steps of this project are to write ROS nodes to implement core functionality of the autonomous vehicle, including the followings:
-* Traffic light detction
+* Traffic light detection
 * Control
 * Waypoint followings
 
