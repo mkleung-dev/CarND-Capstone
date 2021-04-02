@@ -1,7 +1,5 @@
 # **Programming a Real Self-Driving Car**
 
-## Build a Traffic Sign Recognition Project
-
 The goals / steps of this project are to write ROS nodes to implement core functionality of the autonomous vehicle, including the followings:
 * Traffic light detction
 * Control
